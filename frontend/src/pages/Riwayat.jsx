@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Printer, Bluetooth } from "lucide-react";
 import ReceiptView, { buildReceiptText } from "@/components/ReceiptView";
-import { printReceiptBluetooth, isBluetoothSupported } from "@/lib/thermalPrint";
+import { printReceiptBluetooth, isBluetoothSupported, bluetoothBlockedReason } from "@/lib/thermalPrint";
 import { toast } from "sonner";
 
 export default function Riwayat() {
@@ -24,10 +24,15 @@ export default function Riwayat() {
   });
 
   const printBt = async () => {
+    const blocked = bluetoothBlockedReason();
+    if (blocked) {
+      toast.info(blocked, { duration: 7000 });
+      return;
+    }
     try {
       await printReceiptBluetooth(buildReceiptText(detail, settings));
       toast.success("Struk terkirim ke printer");
-    } catch (e) { toast.error(e.message); }
+    } catch (e) { toast.info(e.message, { duration: 7000 }); }
   };
 
   const Pill = ({ active, onClick, children, testid }) => (
@@ -102,7 +107,7 @@ export default function Riwayat() {
               <div className="grid grid-cols-2 gap-2 no-print">
                 <Button variant="outline" onClick={() => window.print()} data-testid="reprint-btn" className="h-11 rounded-xl gap-2"><Printer size={18} /> Cetak Ulang</Button>
                 {isBluetoothSupported() && (
-                  <Button variant="outline" onClick={printBt} className="h-11 rounded-xl gap-2"><Bluetooth size={18} /> Bluetooth</Button>
+                  <Button variant="outline" onClick={printBt} data-testid="print-bluetooth-btn" className="h-11 rounded-xl gap-2"><Bluetooth size={18} /> Bluetooth</Button>
                 )}
               </div>
             </>

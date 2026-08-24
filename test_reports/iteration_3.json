@@ -1,0 +1,33 @@
+{
+  "summary": "Verified Web Bluetooth guarded messaging bug fix on Yulia Kitchen POS (frontend-only). Flow: login as owner -> Kasir -> add 'Paket Hemat Nasi + Es Teh' -> Bayar -> Tunai Uang Pas -> Konfirmasi -> Success screen. Because Playwright Chromium does not expose navigator.bluetooth, an init script mocked navigator.bluetooth so isBluetoothSupported() returned true and requestDevice threw a SecurityError with message 'Web Bluetooth API globally disabled.' — mirroring the real iframe/preview scenario. On success screen the print-bluetooth-btn was clicked and a Bahasa Indonesia INFO toast appeared: 'Cetak Bluetooth diblokir oleh browser di lingkungan ini. Buka aplikasi di tab browser tersendiri (Chrome) atau setelah di-deploy untuk mencetak via Bluetooth.' The raw string 'globally disabled' was NOT visible anywhere in the DOM. No uncaught JS exceptions. print-receipt-btn (Cetak Struk) rendered and remained clickable; new-order-btn (Pesanan Baru) closed the success dialog and reset the cart to 'Keranjang kosong'. In Riwayat, opening a txn-row-* detail modal, clicking the Bluetooth button showed the same friendly Indonesian info toast — no raw error. All primary acceptance criteria pass.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "SuccessScreen bluetooth-hint", "issue": "The hint text with data-testid='bluetooth-hint' only renders when isBluetoothSupported() AND bluetoothBlockedReason() are both truthy. In the Playwright Chromium context (not in iframe), bluetoothBlockedReason() returns null so the hint does not render at all. In the actual Emergent preview iframe it should render. In the test env with mocked navigator.bluetooth (top-window), the hint was absent. Consider always showing the hint when isBluetoothSupported() is true (or add a friendlier gating), because after a click failure users still benefit from the guidance.", "selector": "[data-testid='bluetooth-hint']", "priority": "LOW"},
+      {"component": "Riwayat detail Bluetooth button", "issue": "The Bluetooth button in Riwayat.jsx line ~110 has no data-testid. Testing had to fall back to role/name selector. Add data-testid='print-bluetooth-btn' for parity with SuccessScreen.", "selector": "button:has-text('Bluetooth') inside [data-testid='txn-detail']", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dialogs (Pembayaran, Detail Transaksi, Success)", "issues": ["Radix warning: DialogContent missing DialogTitle / aria-describedby — accessibility warning only, not a functional bug."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add data-testid='print-bluetooth-btn' to the Bluetooth button in /app/frontend/src/pages/Riwayat.jsx for consistent test targeting.",
+    "Consider rendering the bluetooth-hint whenever isBluetoothSupported() is true (drop the bluetoothBlockedReason() gate) so users see the guidance in Chromium/desktop where the API exists but is blocked at click time.",
+    "(Optional a11y) Add DialogTitle (or VisuallyHidden title) to Dialogs to remove Radix accessibility warnings."
+  ],
+  "critical_code_review_comments": [
+    "SuccessScreen.printBluetooth correctly catches thrown errors and uses toast.info — good UX (no red error toast).",
+    "thermalPrint.friendlyError maps SecurityError / 'globally disabled' text to a clear Bahasa Indonesia guidance — verified working.",
+    "Both call sites (SuccessScreen and Riwayat) apply the same guard pattern — good consistency."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped)", "frontend": "100% for the targeted bug-fix scenarios"},
+  "test_credentials": "owner@kopipos.id / owner123 (worked)",
+  "seed_data_creation": "One cash transaction created via Kasir flow (TRX2608240007) as part of e2e verification.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Playwright's Chromium does not expose navigator.bluetooth by default, so isBluetoothSupported() -> false and the print-bluetooth-btn is not rendered. To exercise the click path, inject navigator.bluetooth via page.add_init_script with a requestDevice that rejects with a SecurityError whose message contains 'globally disabled'. Bayar button text is 'Bayar • Rp<amount>'; use name=re.compile('Bayar', re.I) and .last. The Riwayat detail Bluetooth button lacks a data-testid.",
+  "rca of the issue": "N/A — verification of previously-applied fix. Root cause of original bug: raw DOMException message from Web Bluetooth API was surfaced directly to the user as a red toast. Fix wraps calls with bluetoothBlockedReason() pre-check and friendlyError() mapping (SecurityError / 'globally disabled' -> Bahasa Indonesia guidance) and switches to toast.info. Verified in both SuccessScreen and Riwayat."
+}

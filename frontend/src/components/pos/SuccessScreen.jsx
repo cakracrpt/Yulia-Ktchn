@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Printer, PlusCircle, Receipt, Bluetooth } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 import ReceiptView, { buildReceiptText } from "@/components/ReceiptView";
-import { printReceiptBluetooth, isBluetoothSupported } from "@/lib/thermalPrint";
+import { printReceiptBluetooth, isBluetoothSupported, bluetoothBlockedReason } from "@/lib/thermalPrint";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -15,12 +15,17 @@ export default function SuccessScreen({ txn, settings, onNewOrder }) {
   const printBrowser = () => window.print();
 
   const printBluetooth = async () => {
+    const blocked = bluetoothBlockedReason();
+    if (blocked) {
+      toast.info(blocked, { duration: 7000 });
+      return;
+    }
     setBt(true);
     try {
       await printReceiptBluetooth(buildReceiptText(txn, settings));
       toast.success("Struk terkirim ke printer Bluetooth");
     } catch (e) {
-      toast.error(e.message || "Gagal mencetak via Bluetooth");
+      toast.info(e.message || "Gagal mencetak via Bluetooth", { duration: 7000 });
     } finally {
       setBt(false);
     }
@@ -58,6 +63,11 @@ export default function SuccessScreen({ txn, settings, onNewOrder }) {
               </Button>
             )}
           </div>
+          {isBluetoothSupported() && bluetoothBlockedReason() && (
+            <p className="text-[11px] text-muted-foreground text-center px-2" data-testid="bluetooth-hint">
+              Cetak Bluetooth aktif saat aplikasi dibuka di tab browser sendiri (Chrome), bukan di dalam pratinjau.
+            </p>
+          )}
           <Button onClick={onNewOrder} data-testid="new-order-btn"
             className="w-full h-12 rounded-xl bg-accent hover:bg-accent/90 text-accent-foreground font-semibold gap-2 tap">
             <PlusCircle size={18} /> Pesanan Baru
