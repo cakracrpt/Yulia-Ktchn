@@ -731,7 +731,6 @@ async def startup():
     await seed()
 
     # Write test credentials
-    creds = Path("/app/memory/test_credentials.md")
     creds.write_text(
         "# Test Credentials\n\n"
         "## Owner / Admin\n"
