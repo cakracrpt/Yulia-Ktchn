@@ -45,6 +45,7 @@ export function buildReceiptText(txn, settings) {
   });
   out += sep + "\n";
   out += line("Subtotal", formatRupiah(txn.subtotal)) + "\n";
+  if (txn.discount_amount > 0) out += line("Diskon", "-" + formatRupiah(txn.discount_amount)) + "\n";
   if (txn.tax_amount > 0) out += line("Pajak", formatRupiah(txn.tax_amount)) + "\n";
   if (txn.service_amount > 0) out += line("Layanan", formatRupiah(txn.service_amount)) + "\n";
   out += line("TOTAL", formatRupiah(txn.total)) + "\n";
@@ -95,6 +96,7 @@ export default function ReceiptView({ txn, settings }) {
       <div className="border-t border-dashed border-black my-2" />
       <div className="space-y-0.5">
         <div className="flex justify-between"><span>Subtotal</span><span>{formatRupiah(txn.subtotal)}</span></div>
+        {txn.discount_amount > 0 && <div className="flex justify-between"><span>Diskon</span><span>-{formatRupiah(txn.discount_amount)}</span></div>}
         {txn.tax_amount > 0 && <div className="flex justify-between"><span>Pajak</span><span>{formatRupiah(txn.tax_amount)}</span></div>}
         {txn.service_amount > 0 && <div className="flex justify-between"><span>Layanan</span><span>{formatRupiah(txn.service_amount)}</span></div>}
         <div className="flex justify-between font-bold text-sm"><span>TOTAL</span><span>{formatRupiah(txn.total)}</span></div>

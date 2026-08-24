@@ -15,7 +15,8 @@ function itemOptions(item) {
 
 export default function CartPanel({
   cart, orderType, setOrderType, customerName, setCustomerName,
-  tableNumber, setTableNumber, subtotal, tax, service, total, settings,
+  tableNumber, setTableNumber, subtotal, discountType, setDiscountType,
+  discountValue, setDiscountValue, discountAmount, tax, service, total, settings,
   onInc, onDec, onRemove, onClear, onCheckout,
 }) {
   return (
@@ -84,7 +85,29 @@ export default function CartPanel({
       </div>
 
       <div className="border-t border-border p-4 space-y-2 bg-secondary/40">
+        {cart.length > 0 && (
+          <div className="pb-2 mb-1 border-b border-border/70">
+            <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Diskon</label>
+            <div className="flex gap-2">
+              <div className="flex rounded-xl border border-border overflow-hidden bg-white shrink-0">
+                <button onClick={() => setDiscountType("amount")} data-testid="discount-type-amount"
+                  className={`px-3 text-sm font-semibold tap ${discountType === "amount" ? "bg-accent text-accent-foreground" : "text-foreground"}`}>Rp</button>
+                <button onClick={() => setDiscountType("percent")} data-testid="discount-type-percent"
+                  className={`px-3 text-sm font-semibold tap ${discountType === "percent" ? "bg-accent text-accent-foreground" : "text-foreground"}`}>%</button>
+              </div>
+              <Input type="number" value={discountValue || ""} onChange={(e) => setDiscountValue(Number(e.target.value))}
+                placeholder={discountType === "percent" ? "0 %" : "0"} data-testid="discount-input"
+                className="h-10 rounded-xl bg-white text-sm" />
+            </div>
+          </div>
+        )}
         <div className="flex justify-between text-sm"><span className="text-muted-foreground">Subtotal</span><span className="font-medium">{formatRupiah(subtotal)}</span></div>
+        {discountAmount > 0 && (
+          <div className="flex justify-between text-sm text-emerald-600">
+            <span>Diskon{discountType === "percent" ? ` (${discountValue}%)` : ""}</span>
+            <span data-testid="cart-discount">- {formatRupiah(discountAmount)}</span>
+          </div>
+        )}
         {settings?.tax_enabled && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Pajak ({settings.tax_percent}%)</span><span>{formatRupiah(tax)}</span></div>}
         {settings?.service_enabled && <div className="flex justify-between text-sm"><span className="text-muted-foreground">Layanan ({settings.service_percent}%)</span><span>{formatRupiah(service)}</span></div>}
         <div className="flex justify-between items-center pt-1">

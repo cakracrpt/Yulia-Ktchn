@@ -5,7 +5,7 @@ import { formatRupiah } from "@/lib/format";
 import { FILTER_CATEGORIES, STOCK_STATUS } from "@/lib/constants";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Search, ShoppingCart, ImageOff } from "lucide-react";
+import { Search, ShoppingCart, ImageOff, Star } from "lucide-react";
 import { toast } from "sonner";
 import ProductOptionsModal from "@/components/pos/ProductOptionsModal";
 import PaymentModal from "@/components/pos/PaymentModal";
@@ -30,6 +30,8 @@ export default function Kasir() {
   const [orderType, setOrderType] = useState("dine_in");
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
+  const [discountType, setDiscountType] = useState("amount");
+  const [discountValue, setDiscountValue] = useState(0);
   const [optionProduct, setOptionProduct] = useState(null);
   const [payOpen, setPayOpen] = useState(false);
   const [mobileCart, setMobileCart] = useState(false);
@@ -43,13 +45,21 @@ export default function Kasir() {
       const matchCat = category === "Semua" || p.category === category;
       const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
+    }).sort((a, b) => {
+      if (!!b.is_bestseller !== !!a.is_bestseller) return (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0);
+      return a.name.localeCompare(b.name);
     });
   }, [products, category, search]);
 
   const subtotal = useMemo(() => cart.reduce((s, i) => s + i.unitTotal * i.quantity, 0), [cart]);
-  const tax = settings?.tax_enabled ? subtotal * settings.tax_percent / 100 : 0;
-  const service = settings?.service_enabled ? subtotal * settings.service_percent / 100 : 0;
-  const total = Math.round(subtotal + tax + service);
+  const discountAmount = useMemo(() => {
+    if (discountType === "percent") return Math.round(subtotal * Math.min(Math.max(discountValue, 0), 100) / 100);
+    return Math.round(Math.min(Math.max(discountValue, 0), subtotal));
+  }, [discountType, discountValue, subtotal]);
+  const discounted = subtotal - discountAmount;
+  const tax = settings?.tax_enabled ? discounted * settings.tax_percent / 100 : 0;
+  const service = settings?.service_enabled ? discounted * settings.service_percent / 100 : 0;
+  const total = Math.round(discounted + tax + service);
 
   const addItem = (item) => {
     const key = makeKey(item);
@@ -97,6 +107,7 @@ export default function Kasir() {
         })),
         order_type: orderType, customer_name: customerName, table_number: tableNumber,
         payment_method: method, cash_received: cashReceived, client_txn_id: txnKey,
+        discount_type: discountType, discount_value: Number(discountValue) || 0,
       };
       const { data } = await api.post("/checkout", payload);
       setPayOpen(false);
@@ -111,12 +122,14 @@ export default function Kasir() {
 
   const newOrder = () => {
     setCart([]); setCustomerName(""); setTableNumber(""); setOrderType("dine_in");
+    setDiscountType("amount"); setDiscountValue(0);
     setSuccessTxn(null); setTxnKey(crypto.randomUUID());
   };
 
   const cartProps = {
     cart, orderType, setOrderType, customerName, setCustomerName, tableNumber, setTableNumber,
-    subtotal, tax, service, total, settings, onInc: inc, onDec: dec, onRemove: remove, onClear: clear,
+    subtotal, discountType, setDiscountType, discountValue, setDiscountValue, discountAmount,
+    tax, service, total, settings, onInc: inc, onDec: dec, onRemove: remove, onClear: clear,
     onCheckout: openPayment,
   };
   const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
@@ -173,6 +186,11 @@ export default function Kasir() {
                       <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full ${st?.color}`}>
                         {!p.active ? "Tidak Tersedia" : st?.label}
                       </span>
+                      {p.is_bestseller && (
+                        <span className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-accent text-accent-foreground flex items-center gap-0.5 shadow" data-testid={`bestseller-badge-${p.id}`}>
+                          <Star size={10} className="fill-current" /> Best Seller
+                        </span>
+                      )}
                     </div>
                     <div className="p-2.5">
                       <p className="text-[11px] text-muted-foreground">{p.category}</p>

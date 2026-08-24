@@ -12,12 +12,12 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import ImageUpload from "@/components/ImageUpload";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, ImageOff, X } from "lucide-react";
+import { Plus, Pencil, Trash2, ImageOff, X, Star } from "lucide-react";
 
 const EMPTY = {
   name: "", category: "Makanan", price: 0, cost_price: 0, stock: 0, min_stock: 5,
   unit: "pcs", sku: "", description: "", image_url: "", active: true,
-  variant_groups: [], addons: [], has_sweetness: false, has_ice: false,
+  variant_groups: [], addons: [], has_sweetness: false, has_ice: false, is_bestseller: false,
 };
 
 export default function Produk() {
@@ -100,6 +100,7 @@ export default function Produk() {
                     <p className="font-semibold text-sm leading-tight">{p.name}</p>
                     {!p.active && <span className="text-[10px] bg-stone-200 px-1.5 py-0.5 rounded-full shrink-0">Nonaktif</span>}
                   </div>
+                  {p.is_bestseller && <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-accent mt-0.5"><Star size={10} className="fill-current" /> Best Seller</span>}
                   <p className="text-xs text-muted-foreground">{p.category} · {p.unit}</p>
                   <p className="font-mono font-bold text-accent text-sm mt-0.5">{formatRupiah(p.price)}</p>
                   <div className="flex items-center gap-2 mt-1">
@@ -144,6 +145,10 @@ export default function Produk() {
             <div className="flex items-center justify-between bg-secondary/40 rounded-xl px-3 py-2">
               <span className="text-sm font-medium">Produk Aktif (bisa dijual)</span>
               <Switch checked={form.active} onCheckedChange={(v) => set("active", v)} data-testid="product-active" />
+            </div>
+            <div className="flex items-center justify-between bg-accent/10 rounded-xl px-3 py-2">
+              <span className="text-sm font-medium flex items-center gap-1.5"><Star size={15} className="text-accent" /> Menu Andalan (Best Seller)</span>
+              <Switch checked={form.is_bestseller} onCheckedChange={(v) => set("is_bestseller", v)} data-testid="product-bestseller" />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-center justify-between bg-secondary/40 rounded-xl px-3 py-2">

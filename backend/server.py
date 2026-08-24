@@ -183,6 +183,7 @@ class Product(BaseModel):
     addons: List[AddonOption] = []
     has_sweetness: bool = False
     has_ice: bool = False
+    is_bestseller: bool = False
     created_at: str = Field(default_factory=now_iso)
 
 
@@ -202,6 +203,7 @@ class ProductCreate(BaseModel):
     addons: List[AddonOption] = []
     has_sweetness: bool = False
     has_ice: bool = False
+    is_bestseller: bool = False
 
 
 class CartItem(BaseModel):
@@ -224,6 +226,8 @@ class CheckoutRequest(BaseModel):
     table_number: str = ""
     payment_method: str = "cash"  # cash | qris
     cash_received: float = 0
+    discount_type: str = "amount"  # amount | percent
+    discount_value: float = 0
     client_txn_id: str = ""  # idempotency key
 
 
@@ -445,9 +449,16 @@ async def checkout(body: CheckoutRequest, user: dict = Depends(get_current_user)
         line_items.append(li)
 
     settings = await get_settings_doc()
-    tax_amount = subtotal * settings["tax_percent"] / 100 if settings.get("tax_enabled") else 0
-    service_amount = subtotal * settings["service_percent"] / 100 if settings.get("service_enabled") else 0
-    total = round(subtotal + tax_amount + service_amount)
+    # Discount applied on subtotal
+    if body.discount_type == "percent":
+        discount_amount = subtotal * min(max(body.discount_value, 0), 100) / 100
+    else:
+        discount_amount = min(max(body.discount_value, 0), subtotal)
+    discount_amount = round(discount_amount)
+    discounted = subtotal - discount_amount
+    tax_amount = discounted * settings["tax_percent"] / 100 if settings.get("tax_enabled") else 0
+    service_amount = discounted * settings["service_percent"] / 100 if settings.get("service_enabled") else 0
+    total = round(discounted + tax_amount + service_amount)
 
     if body.payment_method == "cash" and body.cash_received < total:
         raise HTTPException(status_code=400, detail="Uang diterima kurang dari total")
@@ -471,9 +482,11 @@ async def checkout(body: CheckoutRequest, user: dict = Depends(get_current_user)
 
     txn = {
         "id": new_id(), "txn_number": txn_number, "client_txn_id": body.client_txn_id,
-        "items": line_items, "subtotal": subtotal, "tax_amount": tax_amount,
-        "service_amount": service_amount, "total": total, "cost_total": cost_total,
-        "gross_profit": total - cost_total, "payment_method": body.payment_method,
+        "items": line_items, "subtotal": subtotal, "discount_amount": discount_amount,
+        "discount_type": body.discount_type, "discount_value": body.discount_value,
+        "tax_amount": tax_amount, "service_amount": service_amount, "total": total,
+        "cost_total": cost_total, "gross_profit": total - cost_total,
+        "payment_method": body.payment_method,
         "cash_received": body.cash_received, "change": change, "status": "paid",
         "order_type": body.order_type, "customer_name": body.customer_name,
         "table_number": body.table_number, "cashier_name": user["name"],
@@ -665,15 +678,15 @@ async def seed():
 
     products = [
         P(name="Mojito Lemon", category="Mojito", price=18000, cost_price=6000, stock=50, unit="gelas",
-          sku="MOJ001", image_url=img["mojito_glass"], has_ice=True, variant_groups=[ukuran], addons=addon_drink),
+          sku="MOJ001", image_url=img["mojito_glass"], has_ice=True, variant_groups=[ukuran], addons=addon_drink, is_bestseller=True),
         P(name="Mojito Strawberry", category="Mojito", price=20000, cost_price=7000, stock=45, unit="gelas",
-          sku="MOJ002", image_url=img["mojito_lime"], has_ice=True, variant_groups=[ukuran], addons=addon_drink),
+          sku="MOJ002", image_url=img["mojito_lime"], has_ice=True, variant_groups=[ukuran], addons=addon_drink, is_bestseller=True),
         P(name="Mojito Leci", category="Mojito", price=20000, cost_price=7000, stock=40, unit="gelas",
           sku="MOJ003", image_url=img["mojito_pour"], has_ice=True, variant_groups=[ukuran], addons=addon_drink),
         P(name="Mojito Blue Ocean", category="Mojito", price=20000, cost_price=7000, stock=40, unit="gelas",
           sku="MOJ004", image_url=img["mojito_sparkle"], has_ice=True, variant_groups=[ukuran], addons=addon_drink),
         P(name="Es Teh Manis", category="Es Teh", price=5000, cost_price=1500, stock=100, unit="gelas",
-          sku="TEH001", image_url=img["teh_manis"], has_sweetness=True, has_ice=True, variant_groups=[ukuran]),
+          sku="TEH001", image_url=img["teh_manis"], has_sweetness=True, has_ice=True, variant_groups=[ukuran], is_bestseller=True),
         P(name="Es Teh Lemon", category="Es Teh", price=10000, cost_price=3000, stock=70, unit="gelas",
           sku="TEH002", image_url=img["teh_lemon"], has_sweetness=True, has_ice=True, variant_groups=[ukuran]),
         P(name="Es Teh Leci", category="Es Teh", price=12000, cost_price=4000, stock=60, unit="gelas",
@@ -685,7 +698,7 @@ async def seed():
         P(name="Jus Stroberi", category="Jus", price=15000, cost_price=5000, stock=35, unit="gelas",
           sku="JUS003", image_url=img["jus_stroberi"], has_sweetness=True, has_ice=True, variant_groups=[ukuran]),
         P(name="Es Kelapa Muda", category="Minuman", price=15000, cost_price=6000, stock=30, unit="gelas",
-          sku="MIN001", image_url=img["kelapa"], has_sweetness=True, has_ice=True),
+          sku="MIN001", image_url=img["kelapa"], has_sweetness=True, has_ice=True, is_bestseller=True),
         P(name="Es Jeruk Nipis", category="Minuman", price=10000, cost_price=3000, stock=4, min_stock=5, unit="gelas",
           sku="MIN002", image_url=img["lemon_water"], has_sweetness=True, has_ice=True),
         P(name="Nasi Goreng", category="Makanan", price=18000, cost_price=8000, stock=30, unit="porsi",
