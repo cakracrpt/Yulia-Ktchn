@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #F2FAF3;
+}
+
+h1, h2, h3, h4, .font-display {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    letter-spacing: -0.01em;
+}
+
+.font-mono, code {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+@layer base {
+    :root {
+        --background: 138 40% 97%;
+        --foreground: 155 45% 11%;
+        --card: 0 0% 100%;
+        --card-foreground: 155 45% 11%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 155 45% 11%;
+        --primary: 158 60% 15%;
+        --primary-foreground: 138 40% 97%;
+        --secondary: 140 35% 92%;
+        --secondary-foreground: 158 60% 15%;
+        --muted: 140 28% 92%;
+        --muted-foreground: 150 12% 40%;
+        --accent: 142 70% 40%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 72% 51%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 145 30% 85%;
+        --input: 145 30% 85%;
+        --ring: 142 70% 40%;
+        --chart-1: 142 70% 40%;
+        --chart-2: 84 65% 45%;
+        --chart-3: 158 60% 15%;
+        --chart-4: 32 90% 50%;
+        --chart-5: 200 70% 45%;
+        --radius: 0.9rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #C6E7CC; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #16A34A; }
+
+.tap { transition: transform 0.08s ease; }
+.tap:active { transform: scale(0.96); }
+
+.grain {
+    background-image: radial-gradient(rgba(16,61,46,0.04) 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+
+@media print {
+    body * { visibility: hidden; }
+    .print-area, .print-area * { visibility: visible; }
+    .print-area { position: absolute; left: 0; top: 0; width: 100%; }
+    .no-print { display: none !important; }
+}

@@ -1,0 +1,84 @@
+{
+  "project_name": "KopiPOS - Aplikasi Kasir & POS F&B Indonesia",
+  "theme": {
+    "archetype": "ORGANIC & COFFEE ROAST (Warm, Tactile, High-Speed POS)",
+    "mode": "Light Warm Cream default with Dark Espresso Accent & Dark Mode Toggle",
+    "primary_colors": {
+      "coffee_dark": "#3D2314",
+      "espresso": "#4A2C11",
+      "roast_amber": "#C26218",
+      "caramel_gold": "#D97706",
+      "cream_bg": "#FAF6F0",
+      "card_surface": "#FFFFFF",
+      "border_subtle": "#E8DEC8",
+      "text_main": "#26170D",
+      "text_muted": "#7A6555"
+    },
+    "status_colors": {
+      "success": "#16A34A",
+      "warning_stok": "#D97706",
+      "danger_habis": "#DC2626",
+      "info_proses": "#2563EB",
+      "ready_siap": "#059669"
+    }
+  },
+  "typography": {
+    "heading_font": "Outfit, sans-serif (Bold, tactile, high-readability)",
+    "body_font": "Plus Jakarta Sans, sans-serif (Modern Indonesian SaaS standard)",
+    "mono_font": "JetBrains Mono, monospace (For receipts & monetary numbers)",
+    "hierarchy": {
+      "hero_title": "text-2xl sm:text-3xl font-bold tracking-tight",
+      "section_header": "text-xl font-bold tracking-tight text-[#3D2314]",
+      "card_title": "text-base font-semibold text-[#26170D]",
+      "price_tag": "font-mono font-bold text-lg text-[#C26218]",
+      "receipt_text": "font-mono text-xs leading-relaxed"
+    }
+  },
+  "layout_and_grids": {
+    "pos_screen": {
+      "desktop_tablet": "Grid layout: LEFT 65%-70% (Search, Category Pills, Product Cards Grid 3-4 cols) | RIGHT 30%-35% (Cart Panel sticky h-screen with Order Summary & Checkout)",
+      "mobile": "Single column product grid with sticky bottom floating cart bar that slides up into full modal sheet"
+    },
+    "product_grid": "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 p-3 sm:p-4",
+    "card_padding": "p-3 sm:p-4",
+    "touch_targets": "min-h-[48px] for buttons, min-w-[48px] for increment/decrement icons"
+  },
+  "key_components": {
+    "pos_cashier": "Category Filter Pills (Semua, Makanan, Minuman, Kopi, Non-Kopi, Dessert, Snack, Paket), Search Bar with instant filter, Stock Status Badges (Tersedia, Stok Menipis, Habis), Touch-friendly Variant/Add-on Modal",
+    "cart_panel": "Customer Name Input, Dine-in/Takeaway toggle, List of items with variant badges & add-ons, Quantity step controls (+/-), Discount/Tax calculation, Clear Cart & Payment trigger button",
+    "payment_modal": "Tabbed Cash (Metode Tunai) & QRIS. Cash includes quick cash buttons: [Uang Pas, Rp20.000, Rp50.000, Rp100.000], custom input, auto change calculation (Kembalian). QRIS shows uploaded QR code image + 'Tandai Sudah Dibayar'",
+    "receipt_component": "Thermal Receipt simulator with 58mm / 80mm preview toggle, print trigger button, shop logo header, date/time, receipt ID, itemized list, subtotal, tax/service fee, payment mode, change amount, and thank you note",
+    "orders_pipeline": "Kanban / Tabbed status workflow: Baru -> Diproses -> Siap -> Selesai / Dibatalkan",
+    "dashboard_reports": "KPI metric cards (Total Penjualan, Total Transaksi, Produk Terlaris, Rata-rata Keranjang), Recharts daily/weekly sales line chart, Category distribution pie/bar chart",
+    "settings_panel": "Shop info form, Logo upload simulator, QRIS image upload simulator, Tax (PPN %) toggle, Service Charge %, Printer selection (Bluetooth Thermal 58mm/80mm), Role Switcher (Owner vs Kasir)"
+  },
+  "image_urls": {
+    "kopi_susu_aren": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "iced_latte": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "iced_coffee_plastic": "https://images.unsplash.com/photo-1549652127-2e5e59e86a7a?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "nasi_goreng_special": "https://images.pexels.com/photos/37171028/pexels-photo-37171028.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "ayam_geprek_dish": "https://images.unsplash.com/photo-1681378128359-a5c2492a3535?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "mie_goreng_indonesia": "https://images.pexels.com/photos/13294535/pexels-photo-13294535.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "traditional_coffee_tea": "https://images.unsplash.com/photo-1653291340079-67789fe1d6e3?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "indonesian_breakfast": "https://images.pexels.com/photos/19834039/pexels-photo-19834039.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+    "croffle_dessert": "https://images.unsplash.com/photo-1611506168759-1e69a83b5a53?crop=entropy&cs=srgb&fm=jpg&q=85",
+    "qris_sample": "https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
+  },
+  "instructions_to_main_agent": [
+    "Language MUST be 100% Bahasa Indonesia with Rupiah formatting e.g. Rp15.000, Rp25.000.",
+    "Use warm coffee brown theme tokens (#3D2314 primary, #4A2C11 secondary, #FAF6F0 warm background, #C26218 vibrant accent).",
+    "Ensure touch target sizes are friendly for tablet/kiosk usage (min 44px-48px).",
+    "Cart panel on desktop/tablet is PERMANENTLY visible on the right side.",
+    "All interactive elements MUST include data-testid (e.g., data-testid='add-to-cart-btn-1', data-testid='cash-payment-btn', data-testid='quick-cash-50000').",
+    "Provide rich sample initial menu data (Kopi Susu Aren, Americano, Matcha Latte, Nasi Goreng Special, Ayam Geprek Sambal Korek, Roti Bakar Coklat Keju, Croffle, Tea, Paket Hemat) with image URLs, stock levels, variants (Hot/Ice, Small/Medium/Large), add-ons (Extra Shot, Boba, Extra Keju), ice level, and sweetness level options.",
+    "Include receipt thermal printer view with print simulation, toggle between 58mm and 80mm widths, and downloading/printing dialog.",
+    "Include real state management or mock database so CRUD operations on products, stock updates, orders flow, and history reflect seamlessly.",
+    "Role switcher (Owner/Admin vs Kasir) in sidebar/header to toggle permissions (e.g. Kasir cannot edit settings or view profit details unless allowed)."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Avoid generic AI design. Use rich coffee palette with rounded cards (rounded-xl/2xl), crisp borders (#E8DEC8), and warm ambient shadows.",
+    "Never use dark full screen gradients. Use solid warm coffee tones or subtle warm cream backgrounds.",
+    "All buttons must have active press animations (e.g. active:scale-95 transition-transform).",
+    "All data displays must handle empty states gracefully in Bahasa Indonesia."
+  ]
+}
